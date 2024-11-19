@@ -45,16 +45,24 @@ class Player {
 }
 
 class Pipe {
-    constructor(x, y) {
+    constructor(x) {
         this.x = x
-        this.y = y
-        this.height = 150
+        this.dx = -1
+        this.height = Math.floor(Math.random() * 100) + 100
         this.width = 50
+        this.gap = Math.floor(Math.random() * 100) + 150
+        this.y = this.height + this.gap
     }
 
     render() {
         ctx.fillStyle = "white"
-        ctx.fillRect(this.x, this.y, this.width, this.height)
+        ctx.fillRect(this.x, 0, this.width, this.height)
+        ctx.fillRect(this.x, this.y, this.width, 500 - this.y)
+    }
+
+    update() {
+        this.x += this.dx
+        this.render()
     }
 }
 
@@ -69,26 +77,41 @@ function drawGround() {
 }
 
 const bread = new Player()
-const upperPipe = new Pipe(500, 0)
-const lowerPipe = new Pipe(500, 500 - 150)
+let pipes = [
+    new Pipe(500),
+    new Pipe(700),
+    new Pipe(900),
+    new Pipe(1100),
+    new Pipe(1300),
+    new Pipe(1500),
+]
 
-function generatePipes(x) {
-    
+function generatePipes() {
+    if (pipes[0].x <= -100) {
+        pipes.shift()
+        const x = pipes.at(-1).x + 200 + Math.floor(Math.random() * 100)
+        pipes.push(new Pipe(x))
+    } 
+}
+
+function renderPipes() {
+    pipes.forEach((pipe) => {
+        pipe.update()
+    })
 }
 
 function gameloop() {
+    generatePipes()
     blankScreen()
+    renderPipes()
     bread.update()
     drawGround()
-    upperPipe.render()
-    lowerPipe.render()
     requestAnimationFrame(gameloop)
 }
 
 requestAnimationFrame(gameloop)
 
 window.addEventListener('keydown', (e) => {
-    console.log(e.code)
     if (e.code === "Space") {
         bread.dy = -8
         bread.dx = 1
