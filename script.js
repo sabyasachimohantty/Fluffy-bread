@@ -5,6 +5,7 @@ const WIDTH = 1024
 const GRAVITY = 0.6
 canvas.height = HEIGHT
 canvas.width = WIDTH
+let gameOver = false
 
 class Player {
     constructor() {
@@ -32,6 +33,12 @@ class Player {
             this.y = 500 - this.height
             this.dy = 0
         }
+        pipes.forEach((pipe) => {
+            if (this.collideLowerPipe(pipe) || this.collideUpperPipe(pipe)) {
+                gameOver = true
+            }
+        })
+
         this.dy += GRAVITY
         this.render()
     }
@@ -41,6 +48,24 @@ class Player {
             this.y + this.height >= 500
         ) return true
         return false
+    }
+
+    collideUpperPipe(pipe) {
+        if (
+            this.x + this.width < pipe.x ||
+            this.x > pipe.x + pipe.width ||
+            this.y > pipe.height
+        ) return false
+        return true
+    }
+
+    collideLowerPipe(pipe) {
+        if (
+            this.x + this.width < pipe.x ||
+            this.x > pipe.x + pipe.width ||
+            this.y + this.height < pipe.y
+        ) return false
+        return true
     }
 }
 
@@ -106,6 +131,14 @@ function gameloop() {
     renderPipes()
     bread.update()
     drawGround()
+    if (gameOver) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.fillStyle = 'white'
+        ctx.font = "50px Arial"
+        ctx.textAlign = "center"
+        ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2)
+    }
     requestAnimationFrame(gameloop)
 }
 
