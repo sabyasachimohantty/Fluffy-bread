@@ -6,6 +6,7 @@ const GRAVITY = 0.6
 canvas.height = HEIGHT
 canvas.width = WIDTH
 let gameOver = false
+let score = 0
 
 class Player {
     constructor() {
@@ -18,7 +19,7 @@ class Player {
     }
 
     render() {
-        ctx.fillStyle = "white"
+        ctx.fillStyle = "skyblue"
         ctx.fillRect(this.x, this.y, this.width, this.height)
     }
 
@@ -110,12 +111,30 @@ let pipes = [
     new Pipe(1300),
     new Pipe(1500),
 ]
+let pipesAhead = [...pipes]
+
+function updateScore() {
+
+    let x = pipesAhead[0].x
+    let width = pipesAhead[0].width
+    if (x + width < bread.x) {
+        if (!gameOver) {
+            score += 1
+        }
+        pipesAhead.shift()
+    }
+    ctx.fillStyle = 'lightgreen'
+    ctx.font = 'bold 30px Arial'
+    ctx.fillText(`Score: ${score}`, 20, 40)
+}
 
 function generatePipes() {
     if (pipes[0].x <= -100) {
         pipes.shift()
         const x = pipes.at(-1).x + 200 + Math.floor(Math.random() * 100)
-        pipes.push(new Pipe(x))
+        const pipe = new Pipe(x)
+        pipes.push(pipe)
+        pipesAhead.push(pipe)
     } 
 }
 
@@ -131,13 +150,15 @@ function gameloop() {
     renderPipes()
     bread.update()
     drawGround()
+    updateScore()
     if (gameOver) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
-        ctx.fillStyle = 'white'
-        ctx.font = "50px Arial"
+        ctx.fillStyle = 'lightgreen'
+        ctx.font = "bold 50px Arial"
         ctx.textAlign = "center"
-        ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2)
+        ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2 - 25)
+        ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 25)
     }
     requestAnimationFrame(gameloop)
 }
@@ -146,7 +167,9 @@ requestAnimationFrame(gameloop)
 
 window.addEventListener('keydown', (e) => {
     if (e.code === "Space") {
-        bread.dy = -8
-        bread.dx = 1
+        if (!gameOver) {
+            bread.dy = -8
+            bread.dx = 1
+        }
     }
 })
